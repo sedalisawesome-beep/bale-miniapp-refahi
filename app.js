@@ -1,5 +1,5 @@
 // Bale WebApp Instance
-const webapp = window.Bale?.WebApp;
+let webapp = window.Bale?.WebApp;
 
 // Data Structure - مراکز رفاهی و خدماتی
 const centersData = {
@@ -75,6 +75,9 @@ let searchQuery = '';
 
 // Initialize App
 function initApp() {
+    // Re-check webapp in case SDK loaded after initial page load
+    webapp = window.Bale?.WebApp;
+
     if (!webapp) {
         console.warn('Bale WebApp SDK not available');
         showApp();
@@ -269,9 +272,38 @@ function updateStats() {
     document.getElementById('totalCenters').textContent = totalCenters;
 }
 
+// Wait for Bale SDK to load
+function waitForBaleSDK() {
+    // If Bale SDK is already available
+    if (window.Bale?.WebApp) {
+        initApp();
+        return;
+    }
+
+    // Wait up to 3 seconds for SDK to load
+    let attempts = 0;
+    const maxAttempts = 30; // 30 * 100ms = 3 seconds
+
+    const checkSDK = setInterval(() => {
+        attempts++;
+
+        if (window.Bale?.WebApp) {
+            clearInterval(checkSDK);
+            // Re-assign webapp reference
+            const webapp = window.Bale.WebApp;
+            initApp();
+        } else if (attempts >= maxAttempts) {
+            // SDK didn't load, continue without it
+            clearInterval(checkSDK);
+            console.warn('Bale SDK timeout, loading without it');
+            initApp();
+        }
+    }, 100);
+}
+
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initApp);
+    document.addEventListener('DOMContentLoaded', waitForBaleSDK);
 } else {
-    initApp();
+    waitForBaleSDK();
 }
