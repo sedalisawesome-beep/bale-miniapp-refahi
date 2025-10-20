@@ -322,18 +322,26 @@ function getCenterDetails(item, categoryKey) {
     const details = {
         description: `یکی از مراکز طرف قرارداد در دسته ${categories[categoryKey].title} که خدمات با کیفیت ارائه می‌دهد.`,
         discount: null,
-        address: 'تهران',
+        address: 'تهران، خیابان ولیعصر، پلاک 123',
+        phone: '021-12345678',
         features: []
     };
 
     // Add category-specific details
     if (categoryKey === 'restaurant') {
-        details.features = ['منوی متنوع', 'محیط دنج', 'قیمت مناسب'];
+        details.description = 'رستوران با کیفیت و محیطی دنج برای پذیرایی از شما عزیزان. منوی متنوع ایرانی و فرنگی.';
+        details.features = ['منوی متنوع', 'محیط دنج', 'قیمت مناسب', 'پارکینگ رایگان'];
+        details.address = 'تهران، خیابان ولیعصر، نرسیده به میدان ونک';
+        details.phone = '021-88123456';
         if (item.name.includes('کافه')) {
             details.features.push('نوشیدنی‌های متنوع');
+            details.features.push('Wi-Fi رایگان');
         }
     } else if (categoryKey === 'pool') {
-        details.features = ['استخر تمیز', 'امکانات کامل'];
+        details.description = 'استخری مجهز با امکانات کامل و کادر حرفه‌ای. آب تمیز و بهداشتی.';
+        details.features = ['استخر تمیز', 'امکانات کامل', 'رختکن مجهز', 'مربی حرفه‌ای'];
+        details.address = 'تهران، خیابان انقلاب، جنب پارک لاله';
+        details.phone = '021-66987654';
         if (item.name.includes('رایگان')) {
             details.discount = 'استفاده رایگان';
         } else if (item.name.includes('60%')) {
@@ -342,17 +350,29 @@ function getCenterDetails(item, categoryKey) {
             details.discount = '50% تخفیف';
         }
     } else if (categoryKey === 'medical') {
-        details.features = ['خدمات پزشکی', 'کادر متخصص'];
-        details.discount = 'تخفیف ویژه';
+        details.description = 'مرکز درمانی مجهز با پزشکان متخصص و کادر حرفه‌ای. خدمات با کیفیت.';
+        details.features = ['خدمات پزشکی', 'کادر متخصص', 'تجهیزات مدرن', 'پذیرش 24 ساعته'];
+        details.discount = 'تخفیف ویژه اعضا';
+        details.address = 'تهران، خیابان شریعتی، بالاتر از پل رومی';
+        details.phone = '021-22334455';
     } else if (categoryKey === 'clothing') {
-        details.features = ['کیفیت عالی', 'قیمت مناسب'];
-        details.discount = 'تخفیف ویژه';
+        details.description = 'فروشگاه پوشاک با برندهای معتبر و قیمت مناسب. تنوع بالا در محصولات.';
+        details.features = ['کیفیت عالی', 'قیمت مناسب', 'برندهای معتبر', 'امکان تعویض'];
+        details.discount = 'تخفیف ویژه 20%';
+        details.address = 'تهران، خیابان سعادت‌آباد، مجتمع تجاری کوروش';
+        details.phone = '021-44556677';
     } else if (categoryKey === 'optical') {
-        details.features = ['برندهای معتبر', 'تنوع بالا'];
-        details.discount = 'تخفیف ویژه';
+        details.description = 'عینک فروشی با برندهای معتبر جهانی. مشاوره رایگان توسط متخصصین.';
+        details.features = ['برندهای معتبر', 'تنوع بالا', 'مشاوره رایگان', 'گارانتی اصالت'];
+        details.discount = 'تخفیف ویژه 15%';
+        details.address = 'تهران، خیابان نیاوران، نبش کوچه هشتم';
+        details.phone = '021-22778899';
     } else if (categoryKey === 'welfare') {
-        details.features = ['خدمات متنوع', 'کیفیت بالا'];
-        details.discount = 'تخفیف ویژه';
+        details.description = 'مرکز ارائه خدمات رفاهی با امکانات کامل و قیمت مناسب.';
+        details.features = ['خدمات متنوع', 'کیفیت بالا', 'قیمت مناسب', 'کادر مجرب'];
+        details.discount = 'تخفیف ویژه اعضا';
+        details.address = 'تهران، میدان تجریش، ابتدای خیابان شریعتی';
+        details.phone = '021-22112233';
     }
 
     return details;
@@ -405,8 +425,18 @@ function showCenterDetails(item, categoryKey) {
         <div class="modal-detail-item">
             <div class="modal-detail-icon">📍</div>
             <div class="modal-detail-content">
-                <div class="modal-detail-label">موقعیت</div>
+                <div class="modal-detail-label">آدرس</div>
                 <div class="modal-detail-value">${details.address}</div>
+            </div>
+        </div>
+    `;
+
+    detailsHTML += `
+        <div class="modal-detail-item">
+            <div class="modal-detail-icon">📞</div>
+            <div class="modal-detail-content">
+                <div class="modal-detail-label">تلفن</div>
+                <div class="modal-detail-value">${details.phone}</div>
             </div>
         </div>
     `;
