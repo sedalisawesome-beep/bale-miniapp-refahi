@@ -186,6 +186,22 @@ function setupEventListeners() {
     });
 }
 
+// Get icon for each item
+function getItemIcon(categoryKey, itemName) {
+    const icons = {
+        restaurant: ['🍽️', '🍔', '🍕', '☕', '🥘', '🍜', '🥗', '🍱', '🍛', '🥙'],
+        clothing: ['👔', '👕', '👗', '🧥', '👖', '👞', '🥾', '🎽', '🧣'],
+        medical: ['🏥', '⚕️', '💊', '🩺', '💉', '🏨', '🔬', '🧪'],
+        welfare: ['🏪', '📚', '🎓', '🛒', '🏬', '🎁', '🪑'],
+        optical: ['👓', '🕶️', '👁️'],
+        pool: ['🏊', '💧', '🌊', '🏊‍♂️', '🏊‍♀️']
+    };
+
+    const categoryIcons = icons[categoryKey] || ['⭐'];
+    const hash = itemName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return categoryIcons[hash % categoryIcons.length];
+}
+
 // Render Content
 function renderContent() {
     const contentDiv = document.getElementById('content');
@@ -236,11 +252,15 @@ function renderContent() {
             itemsList.className = 'items-list';
 
             filteredItems.forEach(item => {
+                const itemIcon = getItemIcon(categoryKey, item.name);
                 const itemCard = document.createElement('div');
                 itemCard.className = 'item-card';
                 itemCard.innerHTML = `
                     <a href="${item.url}" class="item-link" target="_blank" rel="noopener noreferrer">
-                        <span class="item-name">${item.name}</span>
+                        <div class="item-content">
+                            <div class="item-image">${itemIcon}</div>
+                            <span class="item-name">${item.name}</span>
+                        </div>
                         <span class="item-arrow">◀</span>
                     </a>
                 `;
