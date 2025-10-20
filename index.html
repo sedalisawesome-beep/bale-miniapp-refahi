@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مراکز رفاهی و خدماتی</title>
+
+    <!-- Bale WebApp SDK -->
+    <script src="https://tapi.bale.ai/miniapp.js?3"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>در حال بارگذاری...</p>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app" class="app" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <h1>مراکز رفاهی و خدماتی</h1>
+            <p class="subtitle">در حال بروز رسانی مستمر...</p>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="جستجو در مراکز..." class="search-input">
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <select id="provinceFilter" class="filter-select">
+                <option value="all">همه استان‌ها</option>
+                <option value="tehran">تهران</option>
+            </select>
+
+            <select id="categoryFilter" class="filter-select">
+                <option value="all">همه دسته‌ها</option>
+                <option value="restaurant">رستوران‌ها</option>
+                <option value="clothing">پوشاک</option>
+                <option value="medical">مراکز درمانی</option>
+                <option value="pool">استخرها</option>
+                <option value="welfare">رفاهی و خدماتی</option>
+                <option value="optical">عینک فروشی</option>
+            </select>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCenters">0</div>
+                <div class="stat-label">مرکز</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalCategories">6</div>
+                <div class="stat-label">دسته‌بندی</div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div id="content" class="content">
+            <!-- Categories will be dynamically loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-icon">🔍</div>
+            <p>موردی یافت نشد</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
