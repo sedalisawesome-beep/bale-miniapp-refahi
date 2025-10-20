@@ -160,6 +160,9 @@ function showApp() {
 
         setupEventListeners();
         console.log('Event listeners setup complete');
+
+        setupModalListeners();
+        console.log('Modal listeners setup complete');
     } catch (error) {
         console.error('Error in showApp():', error);
     }
@@ -256,19 +259,18 @@ function renderContent() {
                 const itemCard = document.createElement('div');
                 itemCard.className = 'item-card';
                 itemCard.innerHTML = `
-                    <a href="${item.url}" class="item-link" target="_blank" rel="noopener noreferrer">
+                    <div class="item-link">
                         <div class="item-content">
                             <div class="item-image">${itemIcon}</div>
                             <span class="item-name">${item.name}</span>
                         </div>
                         <span class="item-arrow">◀</span>
-                    </a>
+                    </div>
                 `;
 
-                // Handle link clicks
-                itemCard.querySelector('a').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    openLink(item.url);
+                // Handle card clicks - show modal
+                itemCard.addEventListener('click', () => {
+                    showCenterDetails(item, categoryKey);
                 });
 
                 itemsList.appendChild(itemCard);
@@ -313,6 +315,138 @@ function updateStats() {
     });
 
     document.getElementById('totalCenters').textContent = totalCenters;
+}
+
+// Generate center details
+function getCenterDetails(item, categoryKey) {
+    const details = {
+        description: `یکی از مراکز طرف قرارداد در دسته ${categories[categoryKey].title} که خدمات با کیفیت ارائه می‌دهد.`,
+        discount: null,
+        address: 'تهران',
+        features: []
+    };
+
+    // Add category-specific details
+    if (categoryKey === 'restaurant') {
+        details.features = ['منوی متنوع', 'محیط دنج', 'قیمت مناسب'];
+        if (item.name.includes('کافه')) {
+            details.features.push('نوشیدنی‌های متنوع');
+        }
+    } else if (categoryKey === 'pool') {
+        details.features = ['استخر تمیز', 'امکانات کامل'];
+        if (item.name.includes('رایگان')) {
+            details.discount = 'استفاده رایگان';
+        } else if (item.name.includes('60%')) {
+            details.discount = '60% تخفیف';
+        } else if (item.name.includes('50%')) {
+            details.discount = '50% تخفیف';
+        }
+    } else if (categoryKey === 'medical') {
+        details.features = ['خدمات پزشکی', 'کادر متخصص'];
+        details.discount = 'تخفیف ویژه';
+    } else if (categoryKey === 'clothing') {
+        details.features = ['کیفیت عالی', 'قیمت مناسب'];
+        details.discount = 'تخفیف ویژه';
+    } else if (categoryKey === 'optical') {
+        details.features = ['برندهای معتبر', 'تنوع بالا'];
+        details.discount = 'تخفیف ویژه';
+    } else if (categoryKey === 'welfare') {
+        details.features = ['خدمات متنوع', 'کیفیت بالا'];
+        details.discount = 'تخفیف ویژه';
+    }
+
+    return details;
+}
+
+// Show Modal
+function showCenterDetails(item, categoryKey) {
+    const modal = document.getElementById('detailsModal');
+    const details = getCenterDetails(item, categoryKey);
+    const itemIcon = getItemIcon(categoryKey, item.name);
+
+    // Set modal content
+    document.getElementById('modalIcon').textContent = itemIcon;
+    document.getElementById('modalTitle').textContent = item.name;
+    document.getElementById('modalDescription').textContent = details.description;
+
+    // Set image placeholder
+    const imageContainer = document.querySelector('.modal-image-container');
+    const placeholder = document.getElementById('modalImagePlaceholder');
+    placeholder.textContent = itemIcon;
+
+    // Set details
+    let detailsHTML = '';
+
+    if (details.discount) {
+        detailsHTML += `
+            <div class="modal-detail-item">
+                <div class="modal-detail-icon">🎁</div>
+                <div class="modal-detail-content">
+                    <div class="modal-detail-label">تخفیف ویژه</div>
+                    <div class="modal-detail-value">${details.discount}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    if (details.features.length > 0) {
+        detailsHTML += `
+            <div class="modal-detail-item">
+                <div class="modal-detail-icon">⭐</div>
+                <div class="modal-detail-content">
+                    <div class="modal-detail-label">ویژگی‌ها</div>
+                    <div class="modal-detail-value">${details.features.join(' • ')}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    detailsHTML += `
+        <div class="modal-detail-item">
+            <div class="modal-detail-icon">📍</div>
+            <div class="modal-detail-content">
+                <div class="modal-detail-label">موقعیت</div>
+                <div class="modal-detail-value">${details.address}</div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modalDetails').innerHTML = detailsHTML;
+
+    // Set visit button action
+    const visitBtn = document.getElementById('modalVisitBtn');
+    visitBtn.onclick = () => {
+        closeModal();
+        setTimeout(() => openLink(item.url), 300);
+    };
+
+    // Show modal
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+}
+
+// Close Modal
+function closeModal() {
+    const modal = document.getElementById('detailsModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = ''; // Restore scroll
+}
+
+// Setup modal close listeners
+function setupModalListeners() {
+    const modal = document.getElementById('detailsModal');
+    const closeBtn = document.getElementById('modalClose');
+    const overlay = modal.querySelector('.modal-overlay');
+
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+
+    // Close on ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            closeModal();
+        }
+    });
 }
 
 // Wait for Bale SDK to load (with shorter timeout)

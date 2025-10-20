@@ -73,6 +73,36 @@
         </div>
     </div>
 
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">✕</button>
+
+            <div class="modal-image-container">
+                <img id="modalImage" class="modal-image" src="" alt="">
+                <div id="modalImagePlaceholder" class="modal-image-placeholder"></div>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-header-info">
+                    <span id="modalIcon" class="modal-icon"></span>
+                    <h2 id="modalTitle" class="modal-title"></h2>
+                </div>
+
+                <div id="modalDescription" class="modal-description"></div>
+
+                <div id="modalDetails" class="modal-details"></div>
+
+                <div class="modal-actions">
+                    <button id="modalVisitBtn" class="modal-btn modal-btn-primary">
+                        🔗 بازدید از کانال
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="app.js"></script>
 </body>
