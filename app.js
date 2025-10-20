@@ -289,8 +289,6 @@ function waitForBaleSDK() {
 
         if (window.Bale?.WebApp) {
             clearInterval(checkSDK);
-            // Re-assign webapp reference
-            const webapp = window.Bale.WebApp;
             initApp();
         } else if (attempts >= maxAttempts) {
             // SDK didn't load, continue without it
