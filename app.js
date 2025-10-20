@@ -75,37 +75,47 @@ let searchQuery = '';
 
 // Initialize App
 function initApp() {
+    console.log('initApp() called');
+
     // Re-check webapp in case SDK loaded after initial page load
     webapp = window.Bale?.WebApp;
 
     if (!webapp) {
-        console.warn('Bale WebApp SDK not available');
+        console.warn('Bale WebApp SDK not available - running in browser mode');
         showApp();
         return;
     }
 
-    // Apply theme colors
-    applyTheme();
+    console.log('Bale SDK available - initializing...');
 
-    // Setup Back Button
-    webapp.BackButton.onClick(() => {
-        webapp.close();
-    });
-    webapp.BackButton.show();
+    try {
+        // Apply theme colors
+        applyTheme();
 
-    // Expand to full height
-    webapp.expand();
+        // Setup Back Button
+        webapp.BackButton.onClick(() => {
+            webapp.close();
+        });
+        webapp.BackButton.show();
 
-    // Set header color
-    if (webapp.setHeaderColor) {
-        webapp.setHeaderColor('secondary_bg_color');
+        // Expand to full height
+        webapp.expand();
+
+        // Set header color
+        if (webapp.setHeaderColor) {
+            webapp.setHeaderColor('secondary_bg_color');
+        }
+
+        // Enable closing confirmation
+        webapp.enableClosingConfirmation();
+
+        // Notify Bale that the app is ready
+        webapp.ready();
+
+        console.log('Bale SDK initialized successfully');
+    } catch (error) {
+        console.error('Error initializing Bale SDK:', error);
     }
-
-    // Enable closing confirmation
-    webapp.enableClosingConfirmation();
-
-    // Notify Bale that the app is ready
-    webapp.ready();
 
     // Show app after initialization
     showApp();
@@ -135,11 +145,24 @@ function applyTheme() {
 
 // Show App
 function showApp() {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    renderContent();
-    updateStats();
-    setupEventListeners();
+    console.log('showApp() called');
+
+    try {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        console.log('UI updated - loading hidden, app shown');
+
+        renderContent();
+        console.log('Content rendered');
+
+        updateStats();
+        console.log('Stats updated');
+
+        setupEventListeners();
+        console.log('Event listeners setup complete');
+    } catch (error) {
+        console.error('Error in showApp():', error);
+    }
 }
 
 // Setup Event Listeners
@@ -272,28 +295,35 @@ function updateStats() {
     document.getElementById('totalCenters').textContent = totalCenters;
 }
 
-// Wait for Bale SDK to load
+// Wait for Bale SDK to load (with shorter timeout)
 function waitForBaleSDK() {
+    console.log('Starting app initialization...');
+
     // If Bale SDK is already available
     if (window.Bale?.WebApp) {
+        console.log('Bale SDK found immediately');
         initApp();
         return;
     }
 
-    // Wait up to 3 seconds for SDK to load
+    console.log('Bale SDK not found, waiting...');
+
+    // Wait up to 1 second for SDK to load (shorter timeout)
     let attempts = 0;
-    const maxAttempts = 30; // 30 * 100ms = 3 seconds
+    const maxAttempts = 10; // 10 * 100ms = 1 second
 
     const checkSDK = setInterval(() => {
         attempts++;
+        console.log(`Checking for SDK... attempt ${attempts}/${maxAttempts}`);
 
         if (window.Bale?.WebApp) {
             clearInterval(checkSDK);
+            console.log('Bale SDK loaded!');
             initApp();
         } else if (attempts >= maxAttempts) {
             // SDK didn't load, continue without it
             clearInterval(checkSDK);
-            console.warn('Bale SDK timeout, loading without it');
+            console.log('SDK timeout - loading without Bale SDK');
             initApp();
         }
     }, 100);
@@ -303,5 +333,7 @@ function waitForBaleSDK() {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', waitForBaleSDK);
 } else {
+    // DOM already loaded
+    console.log('DOM already ready');
     waitForBaleSDK();
 }
