@@ -1,13 +1,47 @@
-// Admin Credentials (در محیط واقعی این باید در سرور باشد)
-const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: 'admin123'
-};
+// User Credentials (در محیط واقعی این باید در سرور باشد)
+const USERS = [
+    // Super Admin - دسترسی به همه استان‌ها
+    { username: 'admin', password: 'admin123', role: 'admin', province: null },
+
+    // Province Admins - دسترسی فقط به استان خودشان
+    { username: 'tehran', password: 'tehran123', role: 'province', province: 'tehran' },
+    { username: 'gilan', password: 'gilan123', role: 'province', province: 'gilan' },
+    { username: 'azarbayjan_sharghi', password: 'azarbayjan_sharghi123', role: 'province', province: 'azarbayjan_sharghi' },
+    { username: 'azarbayjan_gharbi', password: 'azarbayjan_gharbi123', role: 'province', province: 'azarbayjan_gharbi' },
+    { username: 'kermanshah', password: 'kermanshah123', role: 'province', province: 'kermanshah' },
+    { username: 'khuzestan', password: 'khuzestan123', role: 'province', province: 'khuzestan' },
+    { username: 'fars', password: 'fars123', role: 'province', province: 'fars' },
+    { username: 'esfahan', password: 'esfahan123', role: 'province', province: 'esfahan' },
+    { username: 'khorasan_razavi', password: 'khorasan_razavi123', role: 'province', province: 'khorasan_razavi' },
+    { username: 'qazvin', password: 'qazvin123', role: 'province', province: 'qazvin' },
+    { username: 'semnan', password: 'semnan123', role: 'province', province: 'semnan' },
+    { username: 'qom', password: 'qom123', role: 'province', province: 'qom' },
+    { username: 'markazi', password: 'markazi123', role: 'province', province: 'markazi' },
+    { username: 'zanjan', password: 'zanjan123', role: 'province', province: 'zanjan' },
+    { username: 'mazandaran', password: 'mazandaran123', role: 'province', province: 'mazandaran' },
+    { username: 'golestan', password: 'golestan123', role: 'province', province: 'golestan' },
+    { username: 'ardabil', password: 'ardabil123', role: 'province', province: 'ardabil' },
+    { username: 'yazd', password: 'yazd123', role: 'province', province: 'yazd' },
+    { username: 'kerman', password: 'kerman123', role: 'province', province: 'kerman' },
+    { username: 'hormozgan', password: 'hormozgan123', role: 'province', province: 'hormozgan' },
+    { username: 'lorestan', password: 'lorestan123', role: 'province', province: 'lorestan' },
+    { username: 'ilam', password: 'ilam123', role: 'province', province: 'ilam' },
+    { username: 'kohgiluyeh', password: 'kohgiluyeh123', role: 'province', province: 'kohgiluyeh' },
+    { username: 'bushehr', password: 'bushehr123', role: 'province', province: 'bushehr' },
+    { username: 'sistan', password: 'sistan123', role: 'province', province: 'sistan' },
+    { username: 'kurdistan', password: 'kurdistan123', role: 'province', province: 'kurdistan' },
+    { username: 'hamedan', password: 'hamedan123', role: 'province', province: 'hamedan' },
+    { username: 'chaharmahal', password: 'chaharmahal123', role: 'province', province: 'chaharmahal' },
+    { username: 'khorasan_shomali', password: 'khorasan_shomali123', role: 'province', province: 'khorasan_shomali' },
+    { username: 'khorasan_jonubi', password: 'khorasan_jonubi123', role: 'province', province: 'khorasan_jonubi' },
+    { username: 'alborz', password: 'alborz123', role: 'province', province: 'alborz' }
+];
 
 // Storage Keys
 const STORAGE_KEYS = {
     CENTERS: 'centers_data',
-    SESSION: 'admin_session'
+    SESSION: 'admin_session',
+    USER: 'admin_user'
 };
 
 // Province Labels
@@ -121,6 +155,7 @@ const INITIAL_DATA = {
 };
 
 // State
+let currentUser = null;  // { username, role, province }
 let currentFilter = 'all';
 let currentProvinceFilter = 'all';
 let searchQuery = '';
@@ -138,7 +173,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // Check if user is logged in
 function checkSession() {
     const session = localStorage.getItem(STORAGE_KEYS.SESSION);
-    if (session === 'active') {
+    const userJson = localStorage.getItem(STORAGE_KEYS.USER);
+
+    if (session === 'active' && userJson) {
+        currentUser = JSON.parse(userJson);
         showAdminPanel();
     } else {
         showLoginScreen();
@@ -155,6 +193,22 @@ function showLoginScreen() {
 function showAdminPanel() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
+
+    // Setup user-based restrictions
+    if (currentUser.role === 'province') {
+        // Province admin - محدود به استان خودشان
+        currentProvinceFilter = currentUser.province;
+        const provinceFilterSelect = document.getElementById('provinceFilterAdmin');
+        provinceFilterSelect.value = currentUser.province;
+        provinceFilterSelect.disabled = true;
+        provinceFilterSelect.style.opacity = '0.6';
+    } else {
+        // Super admin - دسترسی به همه
+        const provinceFilterSelect = document.getElementById('provinceFilterAdmin');
+        provinceFilterSelect.disabled = false;
+        provinceFilterSelect.style.opacity = '1';
+    }
+
     loadCenters();
 }
 
@@ -400,12 +454,23 @@ function removeImage() {
 function handleLogin(e) {
     e.preventDefault();
 
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
     const errorDiv = document.getElementById('loginError');
 
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+    // Find user in USERS list
+    const user = USERS.find(u => u.username === username && u.password === password);
+
+    if (user) {
+        // Save session and user info
+        currentUser = {
+            username: user.username,
+            role: user.role,
+            province: user.province
+        };
         localStorage.setItem(STORAGE_KEYS.SESSION, 'active');
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(currentUser));
+
         showAdminPanel();
     } else {
         errorDiv.textContent = '❌ نام کاربری یا رمز عبور اشتباه است';
@@ -417,6 +482,8 @@ function handleLogin(e) {
 function handleLogout() {
     if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
         localStorage.removeItem(STORAGE_KEYS.SESSION);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        currentUser = null;
         showLoginScreen();
         document.getElementById('loginForm').reset();
     }
@@ -621,6 +688,21 @@ function openModal(center = null) {
         document.getElementById('centerUrl').required = true;
         document.getElementById('tableItemsCount').textContent = '0';
         updateStarsDisplay(0);
+
+        // Set default province for new center
+        if (currentUser.role === 'province') {
+            document.getElementById('centerProvince').value = currentUser.province;
+        }
+    }
+
+    // Disable province field for province admins
+    const provinceField = document.getElementById('centerProvince');
+    if (currentUser.role === 'province') {
+        provinceField.disabled = true;
+        provinceField.style.opacity = '0.6';
+    } else {
+        provinceField.disabled = false;
+        provinceField.style.opacity = '1';
     }
 
     modal.style.display = 'flex';
@@ -678,6 +760,12 @@ async function handleSaveCenter(e) {
         return;
     }
 
+    // Security check: Province admins can only add/edit centers in their province
+    if (currentUser.role === 'province' && province !== currentUser.province) {
+        alert('⚠️ شما فقط مجاز به اضافه/ویرایش مراکز استان ' + PROVINCE_LABELS[currentUser.province] + ' هستید');
+        return;
+    }
+
     const centers = await getCenters();
 
     if (editingCenterId) {
@@ -719,8 +807,15 @@ async function handleSaveCenter(e) {
 
 // Edit Center
 async function editCenter(centerId) {
-    editingCenterId = centerId;
     const [province, category, index] = centerId.split('-');
+
+    // Security check: Province admins can only edit centers in their province
+    if (currentUser.role === 'province' && province !== currentUser.province) {
+        alert('⚠️ شما فقط مجاز به ویرایش مراکز استان ' + PROVINCE_LABELS[currentUser.province] + ' هستید');
+        return;
+    }
+
+    editingCenterId = centerId;
     const centers = await getCenters();
     const center = centers[province][category][parseInt(index)];
 
@@ -733,11 +828,18 @@ async function editCenter(centerId) {
 
 // Delete Center
 async function deleteCenter(centerId) {
+    const [province, category, index] = centerId.split('-');
+
+    // Security check: Province admins can only delete centers in their province
+    if (currentUser.role === 'province' && province !== currentUser.province) {
+        alert('⚠️ شما فقط مجاز به حذف مراکز استان ' + PROVINCE_LABELS[currentUser.province] + ' هستید');
+        return;
+    }
+
     if (!confirm('آیا مطمئن هستید که می‌خواهید این مرکز را حذف کنید؟')) {
         return;
     }
 
-    const [province, category, index] = centerId.split('-');
     const centers = await getCenters();
 
     centers[province][category].splice(parseInt(index), 1);
