@@ -1,5 +1,5 @@
-// User Credentials (در محیط واقعی این باید در سرور باشد)
-const USERS = [
+// Default User Credentials (در محیط واقعی این باید در سرور باشد)
+const DEFAULT_USERS = [
     // Super Admin - دسترسی به همه استان‌ها
     { username: 'admin', password: 'admin123', role: 'admin', province: null },
 
@@ -41,8 +41,29 @@ const USERS = [
 const STORAGE_KEYS = {
     CENTERS: 'centers_data',
     SESSION: 'admin_session',
-    USER: 'admin_user'
+    USER: 'admin_user',
+    USERS_LIST: 'users_list'
 };
+
+// Load users from localStorage or use defaults
+let USERS = loadUsers();
+
+function loadUsers() {
+    const stored = localStorage.getItem(STORAGE_KEYS.USERS_LIST);
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {
+            console.error('Error loading users:', e);
+            return [...DEFAULT_USERS];
+        }
+    }
+    return [...DEFAULT_USERS];
+}
+
+function saveUsers() {
+    localStorage.setItem(STORAGE_KEYS.USERS_LIST, JSON.stringify(USERS));
+}
 
 // Province Labels
 const PROVINCE_LABELS = {
@@ -163,6 +184,7 @@ let editingCenterId = null;
 let currentImageBase64 = null;
 let currentRating = 0;
 let currentTableItems = [];  // For table-type centers
+let editingUserIndex = null;  // Index of user being edited
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -202,11 +224,17 @@ function showAdminPanel() {
         provinceFilterSelect.value = currentUser.province;
         provinceFilterSelect.disabled = true;
         provinceFilterSelect.style.opacity = '0.6';
+
+        // Hide manage users button for province admins
+        document.getElementById('manageUsersBtn').style.display = 'none';
     } else {
         // Super admin - دسترسی به همه
         const provinceFilterSelect = document.getElementById('provinceFilterAdmin');
         provinceFilterSelect.disabled = false;
         provinceFilterSelect.style.opacity = '1';
+
+        // Show manage users button for super admin
+        document.getElementById('manageUsersBtn').style.display = 'inline-block';
     }
 
     loadCenters();
@@ -228,6 +256,7 @@ function setupEventListeners() {
 
     // Import Initial Data
     document.getElementById('importDataBtn').addEventListener('click', importInitialData);
+    document.getElementById('manageUsersBtn').addEventListener('click', openUsersModal);
 
     // Center Form
     document.getElementById('centerForm').addEventListener('submit', handleSaveCenter);
@@ -854,3 +883,126 @@ async function deleteCenter(centerId) {
 
     alert('✅ مرکز با موفقیت حذف شد');
 }
+
+// ============================================
+// Users Management Functions
+// ============================================
+
+// Open Users Modal
+function openUsersModal() {
+    const modal = document.getElementById('usersModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    loadUsersTable();
+}
+
+// Close Users Modal
+function closeUsersModal() {
+    document.getElementById('usersModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Load Users Table
+function loadUsersTable() {
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '';
+
+    USERS.forEach((user, index) => {
+        const row = document.createElement('tr');
+
+        const roleLabel = user.role === 'admin' ? 'مدیر کل' : 'مدیر استان';
+        const provinceLabel = user.province ? PROVINCE_LABELS[user.province] : '-';
+
+        // Mask password
+        const maskedPassword = '•'.repeat(user.password.length);
+
+        row.innerHTML = `
+            <td>${user.username}</td>
+            <td><span style="font-family: monospace;">${maskedPassword}</span></td>
+            <td>${roleLabel}</td>
+            <td>${provinceLabel}</td>
+            <td>
+                <button class="btn-edit" onclick="openEditUserModal(${index})" style="font-size: 12px; padding: 5px 10px;">
+                    ✏️ ویرایش
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+}
+
+// Open Edit User Modal
+function openEditUserModal(index) {
+    editingUserIndex = index;
+    const user = USERS[index];
+
+    document.getElementById('editUsername').value = user.username;
+    document.getElementById('editPassword').value = user.password;
+    document.getElementById('editRole').value = user.role === 'admin' ? 'مدیر کل' : 'مدیر استان';
+    document.getElementById('editProvince').value = user.province ? PROVINCE_LABELS[user.province] : '-';
+
+    const modal = document.getElementById('editUserModal');
+    modal.style.display = 'flex';
+}
+
+// Close Edit User Modal
+function closeEditUserModal() {
+    document.getElementById('editUserModal').style.display = 'none';
+    editingUserIndex = null;
+}
+
+// Handle Edit User Submit
+function handleEditUser(e) {
+    e.preventDefault();
+
+    if (editingUserIndex === null) return;
+
+    const newUsername = document.getElementById('editUsername').value.trim();
+    const newPassword = document.getElementById('editPassword').value.trim();
+
+    if (!newUsername || !newPassword) {
+        alert('⚠️ نام کاربری و رمز عبور نمی‌توانند خالی باشند');
+        return;
+    }
+
+    // Check if username already exists (except for current user)
+    const usernameExists = USERS.some((user, index) =>
+        index !== editingUserIndex && user.username === newUsername
+    );
+
+    if (usernameExists) {
+        alert('⚠️ این نام کاربری قبلاً استفاده شده است');
+        return;
+    }
+
+    // Update user
+    USERS[editingUserIndex].username = newUsername;
+    USERS[editingUserIndex].password = newPassword;
+
+    // Save to localStorage
+    saveUsers();
+
+    // Update table
+    loadUsersTable();
+
+    // Close modal
+    closeEditUserModal();
+
+    alert('✅ اطلاعات کاربر با موفقیت ویرایش شد');
+}
+
+// Setup Users Modal Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Users Modal Close
+    document.getElementById('usersModalClose')?.addEventListener('click', closeUsersModal);
+
+    // Edit User Modal
+    document.getElementById('editUserModalClose')?.addEventListener('click', closeEditUserModal);
+    document.getElementById('editUserCancel')?.addEventListener('click', closeEditUserModal);
+    document.getElementById('editUserForm')?.addEventListener('submit', handleEditUser);
+
+    // Close modals on overlay click
+    document.querySelector('#usersModal .modal-overlay')?.addEventListener('click', closeUsersModal);
+    document.querySelector('#editUserModal .modal-overlay')?.addEventListener('click', closeEditUserModal);
+});
