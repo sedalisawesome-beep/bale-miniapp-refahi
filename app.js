@@ -1,12 +1,38 @@
 // Bale WebApp Instance
 let webapp = window.Bale?.WebApp;
 
-// Data Structure - مراکز رفاهی و خدماتی
-const centersData = {
+// Load centers from localStorage or use default data
+function loadCentersData() {
+    const storedData = localStorage.getItem('centers_data');
+    if (storedData) {
+        try {
+            return JSON.parse(storedData);
+        } catch (e) {
+            console.error('Error loading data from localStorage:', e);
+            return getDefaultData();
+        }
+    }
+    return getDefaultData();
+}
+
+// Default Data Structure - مراکز رفاهی و خدماتی
+function getDefaultData() {
+    return {
     tehran: {
         restaurant: [
-            { name: 'کافه رستوران دیبارو', url: 'https://ble.ir/refah014/-322532761545487303/1760446102660' },
-            { name: 'رستوران مخبرالدوله', url: 'https://ble.ir/refah014/277381666708229803/1759566428339' },
+            {
+                name: 'کافه رستوران دیبارو',
+                url: 'https://ble.ir/refah014/-322532761545487303/1760446102660',
+                // می‌تونی برای هر مرکز آدرس و تلفن اختصاصی اضافه کنی:
+                // address: 'آدرس دقیق این مرکز',
+                // phone: '021-12345678'
+            },
+            {
+                name: 'رستوران مخبرالدوله',
+                url: 'https://ble.ir/refah014/277381666708229803/1759566428339',
+                address: 'تهران، خیابان فردوسی، نرسیده به میدان بهارستان',
+                phone: '021-33445566'
+            },
             { name: 'فست فود گامبالو', url: 'https://ble.ir/refah014/-1518217144440737200/1759569915463' },
             { name: 'طباخی کاج تهران', url: 'https://ble.ir/refah014/7476715751840451443/1756902107663' },
             { name: 'کافه فست فود ال سی', url: 'https://ble.ir/refah014/3843225674709020542/1756199560528' },
@@ -55,8 +81,11 @@ const centersData = {
             { name: 'استخر آزادی (50% تخفیف)', url: 'https://ble.ir/refah014/6765200943410615199/1741417584362' },
             { name: 'استخر درفشی فر (50% تخفیف)', url: 'https://ble.ir/refah014/-5530858750612864048/1741417527464' }
         ]
-    }
-};
+    };
+}
+
+// Initialize centers data
+let centersData = loadCentersData();
 
 // Category metadata
 const categories = {
@@ -322,8 +351,8 @@ function getCenterDetails(item, categoryKey) {
     const details = {
         description: `یکی از مراکز طرف قرارداد در دسته ${categories[categoryKey].title} که خدمات با کیفیت ارائه می‌دهد.`,
         discount: null,
-        address: 'تهران، خیابان ولیعصر، پلاک 123',
-        phone: '021-12345678',
+        address: item.address || 'تهران، خیابان ولیعصر، پلاک 123', // استفاده از آدرس اختصاصی یا پیش‌فرض
+        phone: item.phone || '021-12345678', // استفاده از تلفن اختصاصی یا پیش‌فرض
         features: []
     };
 
@@ -331,8 +360,9 @@ function getCenterDetails(item, categoryKey) {
     if (categoryKey === 'restaurant') {
         details.description = 'رستوران با کیفیت و محیطی دنج برای پذیرایی از شما عزیزان. منوی متنوع ایرانی و فرنگی.';
         details.features = ['منوی متنوع', 'محیط دنج', 'قیمت مناسب', 'پارکینگ رایگان'];
-        details.address = 'تهران، خیابان ولیعصر، نرسیده به میدان ونک';
-        details.phone = '021-88123456';
+        // اگر آدرس اختصاصی نداشته باشد، از آدرس پیش‌فرض دسته استفاده می‌شود
+        if (!item.address) details.address = 'تهران، خیابان ولیعصر، نرسیده به میدان ونک';
+        if (!item.phone) details.phone = '021-88123456';
         if (item.name.includes('کافه')) {
             details.features.push('نوشیدنی‌های متنوع');
             details.features.push('Wi-Fi رایگان');
@@ -340,8 +370,8 @@ function getCenterDetails(item, categoryKey) {
     } else if (categoryKey === 'pool') {
         details.description = 'استخری مجهز با امکانات کامل و کادر حرفه‌ای. آب تمیز و بهداشتی.';
         details.features = ['استخر تمیز', 'امکانات کامل', 'رختکن مجهز', 'مربی حرفه‌ای'];
-        details.address = 'تهران، خیابان انقلاب، جنب پارک لاله';
-        details.phone = '021-66987654';
+        if (!item.address) details.address = 'تهران، خیابان انقلاب، جنب پارک لاله';
+        if (!item.phone) details.phone = '021-66987654';
         if (item.name.includes('رایگان')) {
             details.discount = 'استفاده رایگان';
         } else if (item.name.includes('60%')) {
@@ -353,26 +383,26 @@ function getCenterDetails(item, categoryKey) {
         details.description = 'مرکز درمانی مجهز با پزشکان متخصص و کادر حرفه‌ای. خدمات با کیفیت.';
         details.features = ['خدمات پزشکی', 'کادر متخصص', 'تجهیزات مدرن', 'پذیرش 24 ساعته'];
         details.discount = 'تخفیف ویژه اعضا';
-        details.address = 'تهران، خیابان شریعتی، بالاتر از پل رومی';
-        details.phone = '021-22334455';
+        if (!item.address) details.address = 'تهران، خیابان شریعتی، بالاتر از پل رومی';
+        if (!item.phone) details.phone = '021-22334455';
     } else if (categoryKey === 'clothing') {
         details.description = 'فروشگاه پوشاک با برندهای معتبر و قیمت مناسب. تنوع بالا در محصولات.';
         details.features = ['کیفیت عالی', 'قیمت مناسب', 'برندهای معتبر', 'امکان تعویض'];
         details.discount = 'تخفیف ویژه 20%';
-        details.address = 'تهران، خیابان سعادت‌آباد، مجتمع تجاری کوروش';
-        details.phone = '021-44556677';
+        if (!item.address) details.address = 'تهران، خیابان سعادت‌آباد، مجتمع تجاری کوروش';
+        if (!item.phone) details.phone = '021-44556677';
     } else if (categoryKey === 'optical') {
         details.description = 'عینک فروشی با برندهای معتبر جهانی. مشاوره رایگان توسط متخصصین.';
         details.features = ['برندهای معتبر', 'تنوع بالا', 'مشاوره رایگان', 'گارانتی اصالت'];
         details.discount = 'تخفیف ویژه 15%';
-        details.address = 'تهران، خیابان نیاوران، نبش کوچه هشتم';
-        details.phone = '021-22778899';
+        if (!item.address) details.address = 'تهران، خیابان نیاوران، نبش کوچه هشتم';
+        if (!item.phone) details.phone = '021-22778899';
     } else if (categoryKey === 'welfare') {
         details.description = 'مرکز ارائه خدمات رفاهی با امکانات کامل و قیمت مناسب.';
         details.features = ['خدمات متنوع', 'کیفیت بالا', 'قیمت مناسب', 'کادر مجرب'];
         details.discount = 'تخفیف ویژه اعضا';
-        details.address = 'تهران، میدان تجریش، ابتدای خیابان شریعتی';
-        details.phone = '021-22112233';
+        if (!item.address) details.address = 'تهران، میدان تجریش، ابتدای خیابان شریعتی';
+        if (!item.phone) details.phone = '021-22112233';
     }
 
     return details;

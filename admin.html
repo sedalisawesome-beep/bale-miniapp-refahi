@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت - مراکز رفاهی</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🔐 ورود به پنل مدیریت</h1>
+                <p>مراکز رفاهی و خدماتی استان تهران</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">نام کاربری</label>
+                    <input type="text" id="username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">رمز عبور</label>
+                    <input type="password" id="password" required autocomplete="current-password">
+                </div>
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                <button type="submit" class="btn-primary">ورود</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1>پنل مدیریت مراکز</h1>
+                <button id="logoutBtn" class="btn-logout">خروج 🚪</button>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-number" id="totalCentersAdmin">0</div>
+                <div class="stat-label">کل مراکز</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">6</div>
+                <div class="stat-label">دسته‌بندی</div>
+            </div>
+        </div>
+
+        <!-- Add Center Button -->
+        <div class="actions-bar">
+            <button id="addCenterBtn" class="btn-add">
+                ➕ افزودن مرکز جدید
+            </button>
+            <button id="importDataBtn" class="btn-secondary">
+                📥 بارگذاری داده‌های اولیه
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <select id="categoryFilterAdmin" class="filter-select">
+                <option value="all">همه دسته‌ها</option>
+                <option value="restaurant">رستوران‌ها</option>
+                <option value="clothing">پوشاک</option>
+                <option value="medical">مراکز درمانی</option>
+                <option value="pool">استخرها</option>
+                <option value="welfare">رفاهی و خدماتی</option>
+                <option value="optical">عینک فروشی</option>
+            </select>
+            <input type="text" id="searchAdmin" placeholder="جستجو..." class="search-input">
+        </div>
+
+        <!-- Centers List -->
+        <div id="centersList" class="centers-list">
+            <!-- Centers will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="centerModal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="modalTitle">افزودن مرکز جدید</h2>
+                <button class="modal-close" id="modalClose">✕</button>
+            </div>
+            <form id="centerForm" class="modal-body">
+                <div class="form-group">
+                    <label for="centerName">نام مرکز *</label>
+                    <input type="text" id="centerName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="centerCategory">دسته‌بندی *</label>
+                    <select id="centerCategory" required>
+                        <option value="">انتخاب کنید...</option>
+                        <option value="restaurant">رستوران‌ها</option>
+                        <option value="clothing">پوشاک</option>
+                        <option value="medical">مراکز درمانی</option>
+                        <option value="pool">استخرها</option>
+                        <option value="welfare">رفاهی و خدماتی</option>
+                        <option value="optical">عینک فروشی</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="centerUrl">لینک کانال *</label>
+                    <input type="url" id="centerUrl" required placeholder="https://ble.ir/...">
+                </div>
+
+                <div class="form-group">
+                    <label for="centerAddress">آدرس</label>
+                    <input type="text" id="centerAddress" placeholder="آدرس دقیق مرکز (اختیاری)">
+                </div>
+
+                <div class="form-group">
+                    <label for="centerPhone">تلفن</label>
+                    <input type="tel" id="centerPhone" placeholder="021-12345678 (اختیاری)">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">💾 ذخیره</button>
+                    <button type="button" class="btn-secondary" id="modalCancel">انصراف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
