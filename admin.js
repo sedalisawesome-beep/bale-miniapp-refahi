@@ -89,6 +89,8 @@ const INITIAL_DATA = {
 let currentFilter = 'all';
 let searchQuery = '';
 let editingCenterId = null;
+let currentImageBase64 = null;
+let currentRating = 0;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -154,6 +156,107 @@ function setupEventListeners() {
         searchQuery = e.target.value.toLowerCase();
         loadCenters();
     });
+
+    // Image Upload
+    document.getElementById('centerImage').addEventListener('change', handleImageUpload);
+    document.getElementById('removeImage').addEventListener('click', removeImage);
+
+    // Rating Stars
+    setupRatingStars();
+}
+
+// Setup Rating Stars
+function setupRatingStars() {
+    const stars = document.querySelectorAll('.star');
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            currentRating = rating;
+            document.getElementById('centerRating').value = rating;
+            updateStarsDisplay(rating);
+        });
+
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            highlightStars(rating);
+        });
+    });
+
+    document.getElementById('starsDisplay').addEventListener('mouseleave', function() {
+        updateStarsDisplay(currentRating);
+    });
+}
+
+// Update Stars Display
+function updateStarsDisplay(rating) {
+    const stars = document.querySelectorAll('.star');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.textContent = '★';
+            star.classList.add('filled');
+        } else {
+            star.textContent = '☆';
+            star.classList.remove('filled');
+        }
+    });
+}
+
+// Highlight Stars on Hover
+function highlightStars(rating) {
+    const stars = document.querySelectorAll('.star');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.textContent = '★';
+            star.classList.add('active');
+        } else {
+            star.textContent = '☆';
+            star.classList.remove('active');
+        }
+    });
+}
+
+// Handle Image Upload
+function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Check file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        alert('⚠️ حجم عکس نباید بیشتر از 2 مگابایت باشد');
+        e.target.value = '';
+        return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+        alert('⚠️ لطفاً فقط فایل تصویری انتخاب کنید');
+        e.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        currentImageBase64 = event.target.result;
+        showImagePreview(currentImageBase64);
+    };
+    reader.readAsDataURL(file);
+}
+
+// Show Image Preview
+function showImagePreview(base64) {
+    const preview = document.getElementById('imagePreview');
+    const img = document.getElementById('previewImg');
+
+    img.src = base64;
+    preview.style.display = 'block';
+}
+
+// Remove Image
+function removeImage() {
+    currentImageBase64 = null;
+    document.getElementById('centerImage').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('previewImg').src = '';
 }
 
 // Handle Login
@@ -263,11 +366,26 @@ function createCenterCard(center) {
     const card = document.createElement('div');
     card.className = 'center-card';
 
+    // Generate stars HTML
+    let starsHTML = '';
+    if (center.rating && center.rating > 0) {
+        const fullStars = '★'.repeat(center.rating);
+        const emptyStars = '☆'.repeat(5 - center.rating);
+        starsHTML = `
+            <div class="center-rating">
+                <span class="rating-stars">${fullStars}${emptyStars}</span>
+                <span class="rating-number">(${center.rating}/5)</span>
+            </div>
+        `;
+    }
+
     card.innerHTML = `
+        ${center.image ? `<img src="${center.image}" alt="${center.name}" class="center-image">` : ''}
         <div class="center-header">
             <div class="center-info">
                 <h3>${center.name}</h3>
                 <span class="center-category">${CATEGORY_LABELS[center.category]}</span>
+                ${starsHTML}
             </div>
             <div class="center-actions">
                 <button class="btn-edit" onclick="editCenter('${center.id}')">✏️ ویرایش</button>
@@ -288,6 +406,11 @@ function createCenterCard(center) {
                     <strong>📞 تلفن:</strong> ${center.phone}
                 </div>
             ` : ''}
+            ${center.location ? `
+                <a href="${center.location}" target="_blank" class="location-badge">
+                    📍 مشاهده در نقشه
+                </a>
+            ` : ''}
         </div>
     `;
 
@@ -306,9 +429,27 @@ function openModal(center = null) {
         document.getElementById('centerUrl').value = center.url;
         document.getElementById('centerAddress').value = center.address || '';
         document.getElementById('centerPhone').value = center.phone || '';
+        document.getElementById('centerLocation').value = center.location || '';
+
+        // Load image
+        if (center.image) {
+            currentImageBase64 = center.image;
+            showImagePreview(center.image);
+        }
+
+        // Load rating
+        if (center.rating) {
+            currentRating = center.rating;
+            document.getElementById('centerRating').value = center.rating;
+            updateStarsDisplay(center.rating);
+        }
     } else {
         document.getElementById('modalTitle').textContent = 'افزودن مرکز جدید';
         form.reset();
+        currentImageBase64 = null;
+        currentRating = 0;
+        document.getElementById('imagePreview').style.display = 'none';
+        updateStarsDisplay(0);
     }
 
     modal.style.display = 'flex';
@@ -320,6 +461,11 @@ function closeModal() {
     document.getElementById('centerModal').style.display = 'none';
     document.body.style.overflow = '';
     editingCenterId = null;
+    currentImageBase64 = null;
+    currentRating = 0;
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('centerImage').value = '';
+    updateStarsDisplay(0);
 }
 
 // Handle Save Center
@@ -330,7 +476,10 @@ function handleSaveCenter(e) {
         name: document.getElementById('centerName').value.trim(),
         url: document.getElementById('centerUrl').value.trim(),
         address: document.getElementById('centerAddress').value.trim(),
-        phone: document.getElementById('centerPhone').value.trim()
+        phone: document.getElementById('centerPhone').value.trim(),
+        location: document.getElementById('centerLocation').value.trim(),
+        image: currentImageBase64,
+        rating: currentRating
     };
 
     const category = document.getElementById('centerCategory').value;

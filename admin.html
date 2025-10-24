@@ -123,6 +123,36 @@
                     <input type="tel" id="centerPhone" placeholder="021-12345678 (اختیاری)">
                 </div>
 
+                <div class="form-group">
+                    <label for="centerImage">عکس مرکز</label>
+                    <input type="file" id="centerImage" accept="image/*">
+                    <div id="imagePreview" class="image-preview" style="display: none;">
+                        <img id="previewImg" src="" alt="پیش‌نمایش">
+                        <button type="button" class="btn-remove-image" id="removeImage">✕ حذف عکس</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="centerLocation">لینک موقعیت مکانی (Google Maps)</label>
+                    <input type="url" id="centerLocation" placeholder="https://maps.google.com/... (اختیاری)">
+                    <small style="color: #666; font-size: 12px;">💡 از Google Maps لینک موقعیت را کپی کنید</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="centerRating">امتیاز (ستاره)</label>
+                    <div class="rating-input">
+                        <div class="stars-display" id="starsDisplay">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                        <input type="hidden" id="centerRating" value="0">
+                        <small style="color: #666; font-size: 12px;">کلیک کنید تا امتیاز دهید (اختیاری)</small>
+                    </div>
+                </div>
+
                 <div class="modal-footer">
                     <button type="submit" class="btn-primary">💾 ذخیره</button>
                     <button type="button" class="btn-secondary" id="modalCancel">انصراف</button>

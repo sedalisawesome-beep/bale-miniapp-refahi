@@ -447,6 +447,119 @@ body {
     font-size: 18px;
 }
 
+/* Image Preview */
+.image-preview {
+    margin-top: 15px;
+    position: relative;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+.image-preview img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.btn-remove-image {
+    width: 100%;
+    padding: 8px;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.btn-remove-image:hover {
+    background: #d32f2f;
+}
+
+/* Rating Stars */
+.rating-input {
+    margin-top: 5px;
+}
+
+.stars-display {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.star {
+    font-size: 32px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #ddd;
+    user-select: none;
+}
+
+.star:hover {
+    transform: scale(1.2);
+}
+
+.star.active {
+    color: #faa627;
+}
+
+.star.filled {
+    color: #faa627;
+}
+
+/* Rating Display in Cards */
+.center-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    font-size: 18px;
+}
+
+.center-rating .rating-stars {
+    color: #faa627;
+}
+
+.center-rating .rating-number {
+    font-size: 14px;
+    color: #666;
+    margin-right: 5px;
+}
+
+/* Location Badge */
+.location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: #e3f2fd;
+    color: #1976d2;
+    border-radius: 20px;
+    font-size: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+}
+
+.location-badge:hover {
+    background: #1976d2;
+    color: white;
+}
+
+/* Center Image in Card */
+.center-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .header-content {
@@ -471,5 +584,9 @@ body {
     .center-actions {
         width: 100%;
         justify-content: flex-start;
+    }
+
+    .stars-display .star {
+        font-size: 28px;
     }
 }

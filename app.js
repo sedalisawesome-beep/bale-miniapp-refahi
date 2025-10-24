@@ -419,13 +419,40 @@ function showCenterDetails(item, categoryKey) {
     document.getElementById('modalTitle').textContent = item.name;
     document.getElementById('modalDescription').textContent = details.description;
 
-    // Set image placeholder
+    // Set image - use actual image if available, otherwise show placeholder
     const imageContainer = document.querySelector('.modal-image-container');
+    const modalImage = document.getElementById('modalImage');
     const placeholder = document.getElementById('modalImagePlaceholder');
-    placeholder.textContent = itemIcon;
+
+    if (item.image) {
+        modalImage.src = item.image;
+        modalImage.style.display = 'block';
+        placeholder.style.display = 'none';
+    } else {
+        modalImage.style.display = 'none';
+        placeholder.style.display = 'flex';
+        placeholder.textContent = itemIcon;
+    }
 
     // Set details
     let detailsHTML = '';
+
+    // Rating stars
+    if (item.rating && item.rating > 0) {
+        const fullStars = '★'.repeat(item.rating);
+        const emptyStars = '☆'.repeat(5 - item.rating);
+        detailsHTML += `
+            <div class="modal-detail-item">
+                <div class="modal-detail-icon">⭐</div>
+                <div class="modal-detail-content">
+                    <div class="modal-detail-label">امتیاز</div>
+                    <div class="modal-detail-value" style="color: #faa627; font-size: 20px;">
+                        ${fullStars}${emptyStars} <span style="color: #666; font-size: 14px;">(${item.rating}/5)</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     if (details.discount) {
         detailsHTML += `
@@ -470,6 +497,23 @@ function showCenterDetails(item, categoryKey) {
             </div>
         </div>
     `;
+
+    // Location
+    if (item.location) {
+        detailsHTML += `
+            <div class="modal-detail-item">
+                <div class="modal-detail-icon">🗺️</div>
+                <div class="modal-detail-content">
+                    <div class="modal-detail-label">موقعیت مکانی</div>
+                    <div class="modal-detail-value">
+                        <a href="${item.location}" target="_blank" style="color: #1976d2; text-decoration: none;">
+                            📍 مشاهده در نقشه
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     document.getElementById('modalDetails').innerHTML = detailsHTML;
 
