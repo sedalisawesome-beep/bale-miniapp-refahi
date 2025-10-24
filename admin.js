@@ -10,6 +10,41 @@ const STORAGE_KEYS = {
     SESSION: 'admin_session'
 };
 
+// Province Labels
+const PROVINCE_LABELS = {
+    tehran: 'تهران',
+    gilan: 'گیلان',
+    azarbayjan_sharghi: 'آذربایجان شرقی',
+    azarbayjan_gharbi: 'آذربایجان غربی',
+    kermanshah: 'کرمانشاه',
+    khuzestan: 'خوزستان',
+    fars: 'فارس',
+    esfahan: 'اصفهان',
+    khorasan_razavi: 'خراسان رضوی',
+    qazvin: 'قزوین',
+    semnan: 'سمنان',
+    qom: 'قم',
+    markazi: 'مرکزی',
+    zanjan: 'زنجان',
+    mazandaran: 'مازندران',
+    golestan: 'گلستان',
+    ardabil: 'اردبیل',
+    yazd: 'یزد',
+    kerman: 'کرمان',
+    hormozgan: 'هرمزگان',
+    lorestan: 'لرستان',
+    ilam: 'ایلام',
+    kohgiluyeh: 'کهگیلویه و بویراحمد',
+    bushehr: 'بوشهر',
+    sistan: 'سیستان و بلوچستان',
+    kurdistan: 'کردستان',
+    hamedan: 'همدان',
+    chaharmahal: 'چهارمحال و بختیاری',
+    khorasan_shomali: 'خراسان شمالی',
+    khorasan_jonubi: 'خراسان جنوبی',
+    alborz: 'البرز'
+};
+
 // Category Labels
 const CATEGORY_LABELS = {
     restaurant: 'رستوران‌ها',
@@ -87,6 +122,7 @@ const INITIAL_DATA = {
 
 // State
 let currentFilter = 'all';
+let currentProvinceFilter = 'all';
 let searchQuery = '';
 let editingCenterId = null;
 let currentImageBase64 = null;
@@ -148,6 +184,11 @@ function setupEventListeners() {
     document.querySelector('.modal-overlay').addEventListener('click', closeModal);
 
     // Filters
+    document.getElementById('provinceFilterAdmin').addEventListener('change', (e) => {
+        currentProvinceFilter = e.target.value;
+        loadCenters();
+    });
+
     document.getElementById('categoryFilterAdmin').addEventListener('change', (e) => {
         currentFilter = e.target.value;
         loadCenters();
@@ -436,6 +477,10 @@ async function loadCenters() {
     });
 
     // Apply filters
+    if (currentProvinceFilter !== 'all') {
+        filteredCenters = filteredCenters.filter(c => c.province === currentProvinceFilter);
+    }
+
     if (currentFilter !== 'all') {
         filteredCenters = filteredCenters.filter(c => c.category === currentFilter);
     }
@@ -489,7 +534,7 @@ function createCenterCard(center) {
         <div class="center-header">
             <div class="center-info">
                 <h3>${center.name}</h3>
-                <span class="center-category">${CATEGORY_LABELS[center.category]}</span>
+                <span class="center-category">${PROVINCE_LABELS[center.province]} - ${CATEGORY_LABELS[center.category]}</span>
                 ${starsHTML}
             </div>
             <div class="center-actions">
@@ -529,6 +574,7 @@ function openModal(center = null) {
 
     if (center) {
         document.getElementById('modalTitle').textContent = 'ویرایش مرکز';
+        document.getElementById('centerProvince').value = center.province || 'tehran';
         document.getElementById('centerName').value = center.name;
         document.getElementById('centerCategory').value = center.category;
         document.getElementById('centerType').value = center.type || 'single';
@@ -625,16 +671,34 @@ async function handleSaveCenter(e) {
     }
 
     const category = document.getElementById('centerCategory').value;
+    const province = document.getElementById('centerProvince').value;
+
+    if (!province) {
+        alert('⚠️ لطفاً استان را انتخاب کنید');
+        return;
+    }
+
     const centers = await getCenters();
 
     if (editingCenterId) {
         // Update existing center
-        const [province, cat, index] = editingCenterId.split('-');
-        centers[province][cat][parseInt(index)] = centerData;
+        const [oldProvince, cat, index] = editingCenterId.split('-');
+
+        // If province changed, remove from old location and add to new
+        if (oldProvince !== province) {
+            centers[oldProvince][cat].splice(parseInt(index), 1);
+            if (!centers[province]) {
+                centers[province] = {};
+            }
+            if (!centers[province][category]) {
+                centers[province][category] = [];
+            }
+            centers[province][category].push(centerData);
+        } else {
+            centers[oldProvince][cat][parseInt(index)] = centerData;
+        }
     } else {
         // Add new center
-        const province = 'tehran'; // Default to Tehran for now
-
         if (!centers[province]) {
             centers[province] = {};
         }
@@ -662,6 +726,7 @@ async function editCenter(centerId) {
 
     openModal({
         ...center,
+        province,
         category
     });
 }

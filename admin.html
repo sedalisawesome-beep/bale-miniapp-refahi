@@ -63,6 +63,40 @@
 
         <!-- Filters -->
         <div class="filters-bar">
+            <select id="provinceFilterAdmin" class="filter-select">
+                <option value="all">همه استان‌ها</option>
+                <option value="tehran">تهران</option>
+                <option value="gilan">گیلان</option>
+                <option value="azarbayjan_sharghi">آذربایجان شرقی</option>
+                <option value="azarbayjan_gharbi">آذربایجان غربی</option>
+                <option value="kermanshah">کرمانشاه</option>
+                <option value="khuzestan">خوزستان</option>
+                <option value="fars">فارس</option>
+                <option value="esfahan">اصفهان</option>
+                <option value="khorasan_razavi">خراسان رضوی</option>
+                <option value="qazvin">قزوین</option>
+                <option value="semnan">سمنان</option>
+                <option value="qom">قم</option>
+                <option value="markazi">مرکزی</option>
+                <option value="zanjan">زنجان</option>
+                <option value="mazandaran">مازندران</option>
+                <option value="golestan">گلستان</option>
+                <option value="ardabil">اردبیل</option>
+                <option value="yazd">یزد</option>
+                <option value="kerman">کرمان</option>
+                <option value="hormozgan">هرمزگان</option>
+                <option value="lorestan">لرستان</option>
+                <option value="ilam">ایلام</option>
+                <option value="kohgiluyeh">کهگیلویه و بویراحمد</option>
+                <option value="bushehr">بوشهر</option>
+                <option value="sistan">سیستان و بلوچستان</option>
+                <option value="kurdistan">کردستان</option>
+                <option value="hamedan">همدان</option>
+                <option value="chaharmahal">چهارمحال و بختیاری</option>
+                <option value="khorasan_shomali">خراسان شمالی</option>
+                <option value="khorasan_jonubi">خراسان جنوبی</option>
+                <option value="alborz">البرز</option>
+            </select>
             <select id="categoryFilterAdmin" class="filter-select">
                 <option value="all">همه دسته‌ها</option>
                 <option value="restaurant">رستوران‌ها</option>
@@ -90,6 +124,44 @@
                 <button class="modal-close" id="modalClose">✕</button>
             </div>
             <form id="centerForm" class="modal-body">
+                <div class="form-group">
+                    <label for="centerProvince">استان *</label>
+                    <select id="centerProvince" required>
+                        <option value="">انتخاب کنید...</option>
+                        <option value="tehran">تهران</option>
+                        <option value="gilan">گیلان</option>
+                        <option value="azarbayjan_sharghi">آذربایجان شرقی</option>
+                        <option value="azarbayjan_gharbi">آذربایجان غربی</option>
+                        <option value="kermanshah">کرمانشاه</option>
+                        <option value="khuzestan">خوزستان</option>
+                        <option value="fars">فارس</option>
+                        <option value="esfahan">اصفهان</option>
+                        <option value="khorasan_razavi">خراسان رضوی</option>
+                        <option value="qazvin">قزوین</option>
+                        <option value="semnan">سمنان</option>
+                        <option value="qom">قم</option>
+                        <option value="markazi">مرکزی</option>
+                        <option value="zanjan">زنجان</option>
+                        <option value="mazandaran">مازندران</option>
+                        <option value="golestan">گلستان</option>
+                        <option value="ardabil">اردبیل</option>
+                        <option value="yazd">یزد</option>
+                        <option value="kerman">کرمان</option>
+                        <option value="hormozgan">هرمزگان</option>
+                        <option value="lorestan">لرستان</option>
+                        <option value="ilam">ایلام</option>
+                        <option value="kohgiluyeh">کهگیلویه و بویراحمد</option>
+                        <option value="bushehr">بوشهر</option>
+                        <option value="sistan">سیستان و بلوچستان</option>
+                        <option value="kurdistan">کردستان</option>
+                        <option value="hamedan">همدان</option>
+                        <option value="chaharmahal">چهارمحال و بختیاری</option>
+                        <option value="khorasan_shomali">خراسان شمالی</option>
+                        <option value="khorasan_jonubi">خراسان جنوبی</option>
+                        <option value="alborz">البرز</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="centerName">نام مرکز *</label>
                     <input type="text" id="centerName" required>

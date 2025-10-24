@@ -1,6 +1,41 @@
 // Bale WebApp Instance
 let webapp = window.Bale?.WebApp;
 
+// Province Labels
+const PROVINCE_LABELS = {
+    tehran: 'تهران',
+    gilan: 'گیلان',
+    azarbayjan_sharghi: 'آذربایجان شرقی',
+    azarbayjan_gharbi: 'آذربایجان غربی',
+    kermanshah: 'کرمانشاه',
+    khuzestan: 'خوزستان',
+    fars: 'فارس',
+    esfahan: 'اصفهان',
+    khorasan_razavi: 'خراسان رضوی',
+    qazvin: 'قزوین',
+    semnan: 'سمنان',
+    qom: 'قم',
+    markazi: 'مرکزی',
+    zanjan: 'زنجان',
+    mazandaran: 'مازندران',
+    golestan: 'گلستان',
+    ardabil: 'اردبیل',
+    yazd: 'یزد',
+    kerman: 'کرمان',
+    hormozgan: 'هرمزگان',
+    lorestan: 'لرستان',
+    ilam: 'ایلام',
+    kohgiluyeh: 'کهگیلویه و بویراحمد',
+    bushehr: 'بوشهر',
+    sistan: 'سیستان و بلوچستان',
+    kurdistan: 'کردستان',
+    hamedan: 'همدان',
+    chaharmahal: 'چهارمحال و بختیاری',
+    khorasan_shomali: 'خراسان شمالی',
+    khorasan_jonubi: 'خراسان جنوبی',
+    alborz: 'البرز'
+};
+
 // Load centers from API or use default data
 async function loadCentersData() {
     try {
