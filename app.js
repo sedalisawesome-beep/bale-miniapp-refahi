@@ -391,8 +391,8 @@ function openLink(url) {
 
 // Update Stats
 function updateStats() {
-    let totalCenters = 0;
-    let uniqueCategories = new Set();
+    const statsContainer = document.getElementById('statsContainer');
+    const categoryCounts = {};
 
     // Get provinces to count based on filter
     const provincesToCount = currentProvince === 'all'
@@ -407,16 +407,45 @@ function updateStats() {
             const categoryData = provinceData[categoryKey];
             if (!categoryData || categoryData.length === 0) return;
 
-            // Count centers
-            totalCenters += categoryData.length;
+            // Initialize category count
+            if (!categoryCounts[categoryKey]) {
+                categoryCounts[categoryKey] = 0;
+            }
 
-            // Track unique categories
-            uniqueCategories.add(categoryKey);
+            // Count centers in this category
+            categoryData.forEach(item => {
+                if (item.type === 'table' && item.items) {
+                    // For table items (medical centers), count the items inside
+                    categoryCounts[categoryKey] += item.items.length;
+                } else {
+                    // For regular items, count as 1
+                    categoryCounts[categoryKey] += 1;
+                }
+            });
         });
     });
 
-    document.getElementById('totalCenters').textContent = totalCenters;
-    document.getElementById('totalCategories').textContent = uniqueCategories.size;
+    // Clear stats container
+    statsContainer.innerHTML = '';
+
+    // Create stat card for each category
+    Object.keys(categoryCounts).forEach(categoryKey => {
+        const count = categoryCounts[categoryKey];
+        const categoryInfo = categories[categoryKey];
+
+        const statCard = document.createElement('div');
+        statCard.className = 'stat-card';
+        statCard.innerHTML = `
+            <div class="stat-number">${count}</div>
+            <div class="stat-label">${categoryInfo.title}</div>
+        `;
+        statsContainer.appendChild(statCard);
+    });
+
+    // If no stats, show a message
+    if (Object.keys(categoryCounts).length === 0) {
+        statsContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">موردی یافت نشد</p>';
+    }
 }
 
 // Generate center details
