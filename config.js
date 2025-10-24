@@ -8,7 +8,7 @@ const API_CONFIG = {
     // API_URL: 'http://localhost/miniapbale/api.php',
 
     // فعال/غیرفعال کردن حالت آفلاین
-    USE_OFFLINE_MODE: false,
+    USE_OFFLINE_MODE: true,
 };
 
 // API Helper Functions
@@ -18,7 +18,7 @@ const API = {
         if (API_CONFIG.USE_OFFLINE_MODE) {
             // Use localStorage in offline mode
             const data = localStorage.getItem('centers_data');
-            return data ? JSON.parse(data) : { centers: {} };
+            return data ? JSON.parse(data) : {};
         }
 
         try {
