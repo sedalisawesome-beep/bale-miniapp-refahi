@@ -428,24 +428,32 @@ function updateStats() {
     // Clear stats container
     statsContainer.innerHTML = '';
 
-    // Create stat card for each category
+    // If no stats, show a message
+    if (Object.keys(categoryCounts).length === 0) {
+        statsContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">موردی یافت نشد</p>';
+        return;
+    }
+
+    // Create one card with all categories
+    const statCard = document.createElement('div');
+    statCard.className = 'stat-card stat-card-combined';
+
+    let statsHTML = '';
     Object.keys(categoryCounts).forEach(categoryKey => {
         const count = categoryCounts[categoryKey];
         const categoryInfo = categories[categoryKey];
 
-        const statCard = document.createElement('div');
-        statCard.className = 'stat-card';
-        statCard.innerHTML = `
-            <div class="stat-number">${count}</div>
-            <div class="stat-label">${categoryInfo.title}</div>
+        statsHTML += `
+            <div class="stat-item">
+                <span class="stat-icon">${categoryInfo.icon}</span>
+                <span class="stat-count">${count}</span>
+                <span class="stat-name">${categoryInfo.title}</span>
+            </div>
         `;
-        statsContainer.appendChild(statCard);
     });
 
-    // If no stats, show a message
-    if (Object.keys(categoryCounts).length === 0) {
-        statsContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">موردی یافت نشد</p>';
-    }
+    statCard.innerHTML = statsHTML;
+    statsContainer.appendChild(statCard);
 }
 
 // Generate center details
