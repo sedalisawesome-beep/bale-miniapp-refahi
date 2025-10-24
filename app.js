@@ -299,6 +299,9 @@ function renderContent() {
     provincesToShow.forEach(province => {
         const provinceData = centersData[province];
 
+        // Skip if province has no data
+        if (!provinceData) return;
+
         // Get categories to display
         const categoriesToShow = currentCategory === 'all'
             ? Object.keys(provinceData)
