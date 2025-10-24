@@ -109,8 +109,26 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="centerType">نوع مرکز *</label>
+                    <select id="centerType" required>
+                        <option value="single">مرکز تکی (با لینک مستقیم)</option>
+                        <option value="table">لیست مراکز (جدول)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="urlGroup">
                     <label for="centerUrl">لینک کانال *</label>
-                    <input type="url" id="centerUrl" required placeholder="https://ble.ir/...">
+                    <input type="url" id="centerUrl" placeholder="https://ble.ir/...">
+                </div>
+
+                <div class="form-group" id="tableGroup" style="display: none;">
+                    <label>مدیریت لیست مراکز</label>
+                    <button type="button" class="btn-secondary" id="manageTableBtn">
+                        📋 مدیریت جدول مراکز
+                    </button>
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        تعداد: <span id="tableItemsCount">0</span> مرکز
+                    </small>
                 </div>
 
                 <div class="form-group">
@@ -158,6 +176,72 @@
                     <button type="button" class="btn-secondary" id="modalCancel">انصراف</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Table Management Modal -->
+    <div id="tableModal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-dialog" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>📋 مدیریت جدول مراکز</h2>
+                <button class="modal-close" id="tableModalClose">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- Add Item Form -->
+                <div class="table-add-form">
+                    <h3>افزودن مرکز جدید</h3>
+                    <form id="addTableItemForm" class="table-item-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="itemCity">نام شهر *</label>
+                                <input type="text" id="itemCity" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="itemName">نام مرکز *</label>
+                                <input type="text" id="itemName" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="itemPhone">شماره تلفن *</label>
+                                <input type="tel" id="itemPhone" required placeholder="021-12345678">
+                            </div>
+                            <div class="form-group">
+                                <label for="itemAddress">آدرس *</label>
+                                <input type="text" id="itemAddress" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">➕ افزودن به جدول</button>
+                    </form>
+                </div>
+
+                <!-- Table Items List -->
+                <div class="table-items-container">
+                    <h3>لیست مراکز (<span id="tableItemsCountModal">0</span>)</h3>
+                    <div class="table-responsive">
+                        <table id="tableItemsList" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ردیف</th>
+                                    <th>نام شهر</th>
+                                    <th>نام مرکز</th>
+                                    <th>شماره تلفن</th>
+                                    <th>آدرس</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableItemsBody">
+                                <!-- Items will be added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-primary" id="saveTableBtn">💾 ذخیره و بستن</button>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -91,6 +91,7 @@ let searchQuery = '';
 let editingCenterId = null;
 let currentImageBase64 = null;
 let currentRating = 0;
+let currentTableItems = [];  // For table-type centers
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -163,6 +164,101 @@ function setupEventListeners() {
 
     // Rating Stars
     setupRatingStars();
+
+    // Center Type Change
+    document.getElementById('centerType').addEventListener('change', handleCenterTypeChange);
+
+    // Table Management
+    document.getElementById('manageTableBtn').addEventListener('click', openTableModal);
+    document.getElementById('tableModalClose').addEventListener('click', closeTableModal);
+    document.getElementById('saveTableBtn').addEventListener('click', closeTableModal);
+    document.getElementById('addTableItemForm').addEventListener('submit', handleAddTableItem);
+}
+
+// Handle Center Type Change
+function handleCenterTypeChange(e) {
+    const type = e.target.value;
+    const urlGroup = document.getElementById('urlGroup');
+    const tableGroup = document.getElementById('tableGroup');
+    const urlInput = document.getElementById('centerUrl');
+
+    if (type === 'table') {
+        urlGroup.style.display = 'none';
+        tableGroup.style.display = 'block';
+        urlInput.required = false;
+    } else {
+        urlGroup.style.display = 'block';
+        tableGroup.style.display = 'none';
+        urlInput.required = true;
+    }
+}
+
+// Open Table Modal
+function openTableModal() {
+    document.getElementById('tableModal').style.display = 'flex';
+    renderTableItems();
+}
+
+// Close Table Modal
+function closeTableModal() {
+    document.getElementById('tableModal').style.display = 'none';
+}
+
+// Handle Add Table Item
+function handleAddTableItem(e) {
+    e.preventDefault();
+
+    const item = {
+        city: document.getElementById('itemCity').value.trim(),
+        name: document.getElementById('itemName').value.trim(),
+        phone: document.getElementById('itemPhone').value.trim(),
+        address: document.getElementById('itemAddress').value.trim()
+    };
+
+    currentTableItems.push(item);
+    renderTableItems();
+    e.target.reset();
+}
+
+// Render Table Items
+function renderTableItems() {
+    const tbody = document.getElementById('tableItemsBody');
+    tbody.innerHTML = '';
+
+    if (currentTableItems.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">هنوز موردی اضافه نشده است</td></tr>';
+        document.getElementById('tableItemsCount').textContent = '0';
+        document.getElementById('tableItemsCountModal').textContent = '0';
+        return;
+    }
+
+    currentTableItems.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.city}</td>
+            <td>${item.name}</td>
+            <td>${item.phone}</td>
+            <td>${item.address}</td>
+            <td>
+                <div class="table-item-actions">
+                    <button class="btn-table-delete" onclick="deleteTableItem(${index})">🗑️ حذف</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.getElementById('tableItemsCount').textContent = currentTableItems.length;
+    document.getElementById('tableItemsCountModal').textContent = currentTableItems.length;
+}
+
+// Delete Table Item
+function deleteTableItem(index) {
+    if (confirm('آیا مطمئن هستید که می‌خواهید این مرکز را از جدول حذف کنید؟')) {
+        currentTableItems.splice(index, 1);
+        renderTableItems();
+    }
 }
 
 // Setup Rating Stars
@@ -426,10 +522,25 @@ function openModal(center = null) {
         document.getElementById('modalTitle').textContent = 'ویرایش مرکز';
         document.getElementById('centerName').value = center.name;
         document.getElementById('centerCategory').value = center.category;
-        document.getElementById('centerUrl').value = center.url;
+        document.getElementById('centerType').value = center.type || 'single';
+        document.getElementById('centerUrl').value = center.url || '';
         document.getElementById('centerAddress').value = center.address || '';
         document.getElementById('centerPhone').value = center.phone || '';
         document.getElementById('centerLocation').value = center.location || '';
+
+        // Load type-specific data
+        if (center.type === 'table') {
+            currentTableItems = center.items || [];
+            document.getElementById('urlGroup').style.display = 'none';
+            document.getElementById('tableGroup').style.display = 'block';
+            document.getElementById('centerUrl').required = false;
+            document.getElementById('tableItemsCount').textContent = currentTableItems.length;
+        } else {
+            currentTableItems = [];
+            document.getElementById('urlGroup').style.display = 'block';
+            document.getElementById('tableGroup').style.display = 'none';
+            document.getElementById('centerUrl').required = true;
+        }
 
         // Load image
         if (center.image) {
@@ -448,7 +559,12 @@ function openModal(center = null) {
         form.reset();
         currentImageBase64 = null;
         currentRating = 0;
+        currentTableItems = [];
         document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('urlGroup').style.display = 'block';
+        document.getElementById('tableGroup').style.display = 'none';
+        document.getElementById('centerUrl').required = true;
+        document.getElementById('tableItemsCount').textContent = '0';
         updateStarsDisplay(0);
     }
 
@@ -472,15 +588,32 @@ function closeModal() {
 function handleSaveCenter(e) {
     e.preventDefault();
 
+    const centerType = document.getElementById('centerType').value;
     const centerData = {
         name: document.getElementById('centerName').value.trim(),
-        url: document.getElementById('centerUrl').value.trim(),
+        type: centerType,
         address: document.getElementById('centerAddress').value.trim(),
         phone: document.getElementById('centerPhone').value.trim(),
         location: document.getElementById('centerLocation').value.trim(),
         image: currentImageBase64,
         rating: currentRating
     };
+
+    // Add type-specific data
+    if (centerType === 'table') {
+        if (currentTableItems.length === 0) {
+            alert('⚠️ لطفاً حداقل یک مرکز به جدول اضافه کنید');
+            return;
+        }
+        centerData.items = currentTableItems;
+        centerData.url = ''; // No URL for table type
+    } else {
+        centerData.url = document.getElementById('centerUrl').value.trim();
+        if (!centerData.url) {
+            alert('⚠️ لطفاً لینک کانال را وارد کنید');
+            return;
+        }
+    }
 
     const category = document.getElementById('centerCategory').value;
     const centers = getCenters();

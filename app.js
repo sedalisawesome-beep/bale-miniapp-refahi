@@ -297,9 +297,13 @@ function renderContent() {
                     </div>
                 `;
 
-                // Handle card clicks - show modal
+                // Handle card clicks - show modal or table
                 itemCard.addEventListener('click', () => {
-                    showCenterDetails(item, categoryKey);
+                    if (item.type === 'table') {
+                        showTableModal(item);
+                    } else {
+                        showCenterDetails(item, categoryKey);
+                    }
                 });
 
                 itemsList.appendChild(itemCard);
@@ -551,6 +555,57 @@ function setupModalListeners() {
             closeModal();
         }
     });
+
+    // Table Modal listeners
+    const tableModal = document.getElementById('tableModal');
+    const tableCloseBtn = document.getElementById('tableModalClose');
+    const tableOverlay = tableModal.querySelector('.modal-overlay');
+
+    tableCloseBtn.addEventListener('click', closeTableModal);
+    tableOverlay.addEventListener('click', closeTableModal);
+
+    // Close table modal on ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && tableModal.style.display === 'flex') {
+            closeTableModal();
+        }
+    });
+}
+
+// Show Table Modal
+function showTableModal(center) {
+    const modal = document.getElementById('tableModal');
+    const title = document.getElementById('tableModalTitle');
+    const tbody = document.getElementById('centersTableBody');
+
+    title.textContent = center.name;
+    tbody.innerHTML = '';
+
+    if (!center.items || center.items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">اطلاعاتی ثبت نشده است</td></tr>';
+    } else {
+        center.items.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${item.city}</td>
+                <td>${item.name}</td>
+                <td>${item.phone}</td>
+                <td>${item.address}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+// Close Table Modal
+function closeTableModal() {
+    const modal = document.getElementById('tableModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
 }
 
 // Wait for Bale SDK to load (with shorter timeout)
