@@ -389,14 +389,31 @@ function openLink(url) {
 // Update Stats
 function updateStats() {
     let totalCenters = 0;
+    let uniqueCategories = new Set();
 
-    Object.values(centersData).forEach(province => {
-        Object.values(province).forEach(category => {
-            totalCenters += category.length;
+    // Get provinces to count based on filter
+    const provincesToCount = currentProvince === 'all'
+        ? Object.keys(centersData)
+        : [currentProvince];
+
+    provincesToCount.forEach(province => {
+        const provinceData = centersData[province];
+        if (!provinceData) return;
+
+        Object.keys(provinceData).forEach(categoryKey => {
+            const categoryData = provinceData[categoryKey];
+            if (!categoryData || categoryData.length === 0) return;
+
+            // Count centers
+            totalCenters += categoryData.length;
+
+            // Track unique categories
+            uniqueCategories.add(categoryKey);
         });
     });
 
     document.getElementById('totalCenters').textContent = totalCenters;
+    document.getElementById('totalCategories').textContent = uniqueCategories.size;
 }
 
 // Generate center details
