@@ -1,18 +1,19 @@
 // Bale WebApp Instance
 let webapp = window.Bale?.WebApp;
 
-// Load centers from localStorage or use default data
-function loadCentersData() {
-    const storedData = localStorage.getItem('centers_data');
-    if (storedData) {
-        try {
-            return JSON.parse(storedData);
-        } catch (e) {
-            console.error('Error loading data from localStorage:', e);
+// Load centers from API or use default data
+async function loadCentersData() {
+    try {
+        const centers = await API.getCenters();
+        // If empty, return default data
+        if (!centers || Object.keys(centers).length === 0) {
             return getDefaultData();
         }
+        return centers;
+    } catch (e) {
+        console.error('Error loading data from API:', e);
+        return getDefaultData();
     }
-    return getDefaultData();
 }
 
 // Default Data Structure - مراکز رفاهی و خدماتی
@@ -81,11 +82,18 @@ function getDefaultData() {
             { name: 'استخر آزادی (50% تخفیف)', url: 'https://ble.ir/refah014/6765200943410615199/1741417584362' },
             { name: 'استخر درفشی فر (50% تخفیف)', url: 'https://ble.ir/refah014/-5530858750612864048/1741417527464' }
         ]
-    };
+    }
+};
 }
 
 // Initialize centers data
-let centersData = loadCentersData();
+let centersData = {};
+
+// Load data asynchronously
+async function initializeCentersData() {
+    centersData = await loadCentersData();
+    console.log('Centers data loaded:', Object.keys(centersData).length, 'provinces');
+}
 
 // Category metadata
 const categories = {
@@ -103,7 +111,7 @@ let currentCategory = 'all';
 let searchQuery = '';
 
 // Initialize App
-function initApp() {
+async function initApp() {
     console.log('initApp() called');
 
     // Re-check webapp in case SDK loaded after initial page load
@@ -111,7 +119,7 @@ function initApp() {
 
     if (!webapp) {
         console.warn('Bale WebApp SDK not available - running in browser mode');
-        showApp();
+        await showApp();
         return;
     }
 
@@ -147,7 +155,7 @@ function initApp() {
     }
 
     // Show app after initialization
-    showApp();
+    await showApp();
 }
 
 // Apply Bale Theme
@@ -173,10 +181,14 @@ function applyTheme() {
 }
 
 // Show App
-function showApp() {
+async function showApp() {
     console.log('showApp() called');
 
     try {
+        // Load centers data first
+        await initializeCentersData();
+        console.log('Centers data initialized');
+
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
         console.log('UI updated - loading hidden, app shown');
@@ -194,6 +206,8 @@ function showApp() {
         console.log('Modal listeners setup complete');
     } catch (error) {
         console.error('Error in showApp():', error);
+        // Show error message to user
+        document.getElementById('loading').innerHTML = '<p style="color: #ed1a24;">خطا در بارگذاری داده‌ها</p>';
     }
 }
 

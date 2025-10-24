@@ -381,29 +381,38 @@ function handleLogout() {
     }
 }
 
-// Get Centers from Storage
-function getCenters() {
-    const data = localStorage.getItem(STORAGE_KEYS.CENTERS);
-    return data ? JSON.parse(data) : { tehran: {} };
+// Get Centers from API
+async function getCenters() {
+    try {
+        return await API.getCenters();
+    } catch (error) {
+        console.error('Error getting centers:', error);
+        return { tehran: {} };
+    }
 }
 
-// Save Centers to Storage
-function saveCenters(centers) {
-    localStorage.setItem(STORAGE_KEYS.CENTERS, JSON.stringify(centers));
+// Save Centers to API
+async function saveCenters(centers) {
+    try {
+        await API.saveCenters(centers);
+    } catch (error) {
+        console.error('Error saving centers:', error);
+        alert('⚠️ خطا در ذخیره‌سازی. لطفاً دوباره تلاش کنید.');
+    }
 }
 
 // Import Initial Data
-function importInitialData() {
+async function importInitialData() {
     if (confirm('آیا مطمئن هستید؟ این عملیات داده‌های فعلی را جایگزین می‌کند.')) {
-        saveCenters(INITIAL_DATA);
-        loadCenters();
+        await saveCenters(INITIAL_DATA);
+        await loadCenters();
         alert('✅ داده‌های اولیه با موفقیت بارگذاری شد');
     }
 }
 
 // Load and Display Centers
-function loadCenters() {
-    const centers = getCenters();
+async function loadCenters() {
+    const centers = await getCenters();
     const list = document.getElementById('centersList');
     list.innerHTML = '';
 
@@ -585,7 +594,7 @@ function closeModal() {
 }
 
 // Handle Save Center
-function handleSaveCenter(e) {
+async function handleSaveCenter(e) {
     e.preventDefault();
 
     const centerType = document.getElementById('centerType').value;
@@ -616,7 +625,7 @@ function handleSaveCenter(e) {
     }
 
     const category = document.getElementById('centerCategory').value;
-    const centers = getCenters();
+    const centers = await getCenters();
 
     if (editingCenterId) {
         // Update existing center
@@ -637,18 +646,18 @@ function handleSaveCenter(e) {
         centers[province][category].push(centerData);
     }
 
-    saveCenters(centers);
+    await saveCenters(centers);
     closeModal();
-    loadCenters();
+    await loadCenters();
 
     alert(editingCenterId ? '✅ مرکز با موفقیت ویرایش شد' : '✅ مرکز جدید با موفقیت اضافه شد');
 }
 
 // Edit Center
-function editCenter(centerId) {
+async function editCenter(centerId) {
     editingCenterId = centerId;
     const [province, category, index] = centerId.split('-');
-    const centers = getCenters();
+    const centers = await getCenters();
     const center = centers[province][category][parseInt(index)];
 
     openModal({
@@ -658,13 +667,13 @@ function editCenter(centerId) {
 }
 
 // Delete Center
-function deleteCenter(centerId) {
+async function deleteCenter(centerId) {
     if (!confirm('آیا مطمئن هستید که می‌خواهید این مرکز را حذف کنید؟')) {
         return;
     }
 
     const [province, category, index] = centerId.split('-');
-    const centers = getCenters();
+    const centers = await getCenters();
 
     centers[province][category].splice(parseInt(index), 1);
 
@@ -673,8 +682,8 @@ function deleteCenter(centerId) {
         delete centers[province][category];
     }
 
-    saveCenters(centers);
-    loadCenters();
+    await saveCenters(centers);
+    await loadCenters();
 
     alert('✅ مرکز با موفقیت حذف شد');
 }
