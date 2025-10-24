@@ -312,9 +312,23 @@ function renderContent() {
             if (!categoryData) return;
 
             // Filter items by search query
-            const filteredItems = categoryData.filter(item =>
-                item.name.toLowerCase().includes(searchQuery)
-            );
+            const filteredItems = categoryData.filter(item => {
+                // Check item name
+                if (item.name.toLowerCase().includes(searchQuery)) {
+                    return true;
+                }
+
+                // If it's a table item, search inside items too
+                if (item.type === 'table' && item.items && item.items.length > 0) {
+                    return item.items.some(subItem =>
+                        (subItem.name && subItem.name.toLowerCase().includes(searchQuery)) ||
+                        (subItem.city && subItem.city.toLowerCase().includes(searchQuery)) ||
+                        (subItem.address && subItem.address.toLowerCase().includes(searchQuery))
+                    );
+                }
+
+                return false;
+            });
 
             if (filteredItems.length === 0) return;
 
@@ -352,7 +366,7 @@ function renderContent() {
                 // Handle card clicks - show modal or table
                 itemCard.addEventListener('click', () => {
                     if (item.type === 'table') {
-                        showTableModal(item);
+                        showTableModal(item, searchQuery);
                     } else {
                         showCenterDetails(item, categoryKey);
                     }
@@ -679,7 +693,7 @@ function setupModalListeners() {
 }
 
 // Show Table Modal
-function showTableModal(center) {
+function showTableModal(center, filterQuery = '') {
     const modal = document.getElementById('tableModal');
     const title = document.getElementById('tableModalTitle');
     const tbody = document.getElementById('centersTableBody');
@@ -690,17 +704,31 @@ function showTableModal(center) {
     if (!center.items || center.items.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">اطلاعاتی ثبت نشده است</td></tr>';
     } else {
-        center.items.forEach((item, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${item.city}</td>
-                <td>${item.name}</td>
-                <td>${item.phone}</td>
-                <td>${item.address}</td>
-            `;
-            tbody.appendChild(row);
-        });
+        // Filter items if search query exists
+        let itemsToShow = center.items;
+        if (filterQuery && filterQuery.trim() !== '') {
+            itemsToShow = center.items.filter(item =>
+                (item.name && item.name.toLowerCase().includes(filterQuery)) ||
+                (item.city && item.city.toLowerCase().includes(filterQuery)) ||
+                (item.address && item.address.toLowerCase().includes(filterQuery))
+            );
+        }
+
+        if (itemsToShow.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">موردی یافت نشد</td></tr>';
+        } else {
+            itemsToShow.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.city || '-'}</td>
+                    <td>${item.name || '-'}</td>
+                    <td>${item.phone || '-'}</td>
+                    <td>${item.address || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
     }
 
     modal.style.display = 'flex';
